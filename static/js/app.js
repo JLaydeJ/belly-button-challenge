@@ -13,13 +13,35 @@ function init(){
         const dropdownMenu = d3.select('#selDataset');
 
       // Add option names/ids to dropdown menu
-        data.names.forEach(id => {
-            dropdownMenu.append('option').text(id).property('value', id);
+        data.names.forEach(name => {
+            dropdownMenu.append('option').text(name).property('value', name);
         });
         // Set iniial/default data point on dashboard
-        optionSelection(data.names[0], data)
+        // Use optionChanged from html to pull data points
+        optionChanged(data.names[0], data);
+
     });
 }
+// Ceate graphs using first data point
+// Create function to update dashboard for new data point selected
+function optionChanged(newData, data) {
+
+    d3.json(url).then(data => {
+    // Pull data for selected data point
+    const selectedData = data.samples.find(sample => sample.id === newData);
+    const metadata = data.metadata.find(metadata => metadata.id.toString() === newData);
+
+	// Update demographic chart
+    demographicChart(metadata);
+
+	// Bar and Bubble Chart
+    barAndBubbleChart(selectedData);
+
+	// Gauge chart
+    gaugeChart(metadata);
+    });
+}
+
 
 // Create and display default bubble and bar chart
 function barAndBubbleChart(data){
@@ -40,6 +62,7 @@ function barAndBubbleChart(data){
 
     // Plot bar chart
     Plotly.newPlot('bar',[trace1]);
+
 
     // Define trace for bubble chart
     let trace2 = {
@@ -64,11 +87,53 @@ function barAndBubbleChart(data){
 
     // Plot bubble chart
     Plotly.newPlot('bubble',[trace2], layout);
-    }
+}
 
 // // Create and display default gauge chart
-
-
-
-
+function gaugeChart(data){
+    let wfreq = data.wfreq;
+    let gauge1 = [{
+            type: 'indicator',
+            mode: 'gauge+number',
+            title: {text: 'Belly Button Washing Frequency<br>Scrubs per Week'},
+            value: wfreq,
+            gauge: {
+                shape: 'angular',
+                axis: {range: [null, 9], tickwidth: 1, tickcolor: "black" },
+                bar: {color: 'black'},
+                steps: [
+                    { range: [0, 1], color: "white" },
+                    { range: [1, 2], color: "lightblue" },
+                    { range: [2, 3], color: "yellowgreen" },
+                    { range: [3, 4], color: "green" },
+                    { range: [4, 5], color: "lightgreen" },
+                    { range: [5, 6], color: "darkgreen" },
+                    { range: [6, 7], color: "yellow" },
+                    { range: [7, 8], color: "orange" },
+                    { range: [8, 9], color: "lightyellow" }
+                    ],
+                },
+            }
+        ]
+        let layout2 =  {
+            xaxis: {title: 'Swabs per Week'},
+            height: 500,
+            width: 500
+        }  
+        
+        
+    Plotly.newPlot('gauge', gauge1, layout2);
 }
+
+// Create/Update Demographic Chart
+// Use metadataList.html('') to clear previous data
+function demographicChart(metadata) {
+    const metadataList = d3.select('#sample-metadata');
+    metadataList.html(''); 
+    
+    Object.entries(metadata).forEach(([key, value]) => {
+        metadataList.append('p').text(`${key}:${value}`);
+    });
+};
+
+init();

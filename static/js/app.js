@@ -125,8 +125,11 @@ function gaugeChart(data){
     Plotly.newPlot('gauge', gauge1, layout2);
 }
 
-// Create/Update Demographic Chart
+// Create Demographic Chart
 // Use metadataList.html('') to clear previous data
+// https://stackoverflow.com/questions/65495437/problems-creating-a-horizontal-bar-chart-using-javascript-cant-figure-out-my-e
+// https://stackoverflow.com/questions/48747444/object-entries-with-foreach-to-map-array-of-objects-returns-undefined-except-whe
+// Use metadata as defined above
 function demographicChart(metadata) {
     const metadataList = d3.select('#sample-metadata');
     metadataList.html(''); 
